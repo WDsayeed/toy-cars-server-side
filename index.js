@@ -76,7 +76,7 @@ async function run() {
       }
       const result = await toyCarCollection.updateOne(query, toy, option)
       res.send(result)
-    })
+    });
 
     app.delete('/myToys/:id',  async(req, res)=>{
       const id = req.params.id 
