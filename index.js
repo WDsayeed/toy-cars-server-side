@@ -30,8 +30,19 @@ async function run() {
     const toyCarCollection = client.db('toyCarHubDB').collection('toyCar')
     const categoryCollection = client.db('toyCarHubDB').collection('toyCategory')
 
+    const indexKeys = {name:1}
+    const indexOptions = {name: "toyName"}
+    const result = await toyCarCollection.createIndex(indexKeys, indexOptions)
+
+    app.get('/toySearch/:text', async(req, res)=>{
+      const searchText = req.params.text 
+      const result = await toyCarCollection.find({name: {$regex:searchText, $options: 'i'}}).toArray()
+    res.send(result)
+
+    })
+
     app.get('/allToys', async(req, res)=>{
-      const result = await toyCarCollection.find().toArray()
+      const result = await toyCarCollection.find().limit(20).toArray()
       res.send(result)
     })
 
