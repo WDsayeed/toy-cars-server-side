@@ -25,17 +25,15 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
 
     const toyCarCollection = client.db('toyCarHubDB').collection('toyCar')
     const categoryCollection = client.db('toyCarHubDB').collection('toyCategory')
 
-    const indexKeys = {name:1}
-    const indexOptions = {name: "toyName"}
-    const result = await toyCarCollection.createIndex(indexKeys, indexOptions)
 
-    app.get('/toySearch/:text', async(req, res)=>{
-      const searchText = req.params.text 
+    app.get('/toySearch/:name', async(req, res)=>{
+      const searchText = req.params.name 
+      
       const result = await toyCarCollection.find({name: {$regex:searchText, $options: 'i'}}).toArray()
     res.send(result)
 
@@ -60,11 +58,21 @@ async function run() {
     })
 
     app.get('/myToys/:email', async(req, res)=>{
-      console.log(req.params.email)
-      
+      console.log(req)
       const result = await toyCarCollection.find({email: req.params.email}).toArray()
       res.send(result)
     })
+   
+    app.get('/myToysM/:email', async(req, res)=>{
+      const result = await toyCarCollection.find({email: req.params.email}).sort({price: -1}).toArray()
+      res.send(result)
+    })
+   
+    app.get('/myToysP/:email', async(req, res)=>{
+      const result = await toyCarCollection.find({email: req.params.email}).sort({price: 1}).toArray()
+      res.send(result)
+    })
+   
 
     app.get('/allToys/:id', async (req, res)=>{
       const id = req.params.id 
@@ -88,6 +96,14 @@ async function run() {
       const result = await toyCarCollection.updateOne(query, toy, option)
       res.send(result)
     });
+    app.post('/addToys', async(req, res)=>{
+      const body = req.body
+      const price = parseInt(body.price)
+      body.price = price
+      console.log(body)
+      const result = await toyCarCollection.insertOne(body)
+      res.send(result)
+    })
 
     app.delete('/myToys/:id',  async(req, res)=>{
       const id = req.params.id 
@@ -96,15 +112,10 @@ async function run() {
       res.send(result)
     })
 
- app.post('/addToys', async(req, res)=>{
-  const body = req.body
-  console.log(body)
-  const result = await toyCarCollection.insertOne(body)
-  res.send(result)
-})
+
 
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
+    // await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
     // Ensures that the client will close when you finish/error
