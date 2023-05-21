@@ -63,12 +63,12 @@ async function run() {
       res.send(result)
     })
    
-    app.get('/myToysM/:email', async(req, res)=>{
+    app.get('/myToysDescending/:email', async(req, res)=>{
       const result = await toyCarCollection.find({email: req.params.email}).sort({price: -1}).toArray()
       res.send(result)
     })
    
-    app.get('/myToysP/:email', async(req, res)=>{
+    app.get('/myToysAscending/:email', async(req, res)=>{
       const result = await toyCarCollection.find({email: req.params.email}).sort({price: 1}).toArray()
       res.send(result)
     })
@@ -86,6 +86,7 @@ async function run() {
       const query = {_id: new ObjectId(id)}
       const option = {upsert: true}
       const updatedToy = req.body
+      const price = parseInt(updatedToy.price)
       const toy = {
         $set:{
           quantity:updatedToy.quantity,
@@ -96,6 +97,7 @@ async function run() {
       const result = await toyCarCollection.updateOne(query, toy, option)
       res.send(result)
     });
+    
     app.post('/addToys', async(req, res)=>{
       const body = req.body
       const price = parseInt(body.price)
